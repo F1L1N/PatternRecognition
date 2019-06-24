@@ -1,0 +1,7 @@
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\bin\Debug\PatternRecognition.exe.config
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\bin\Debug\PatternRecognition.exe
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\bin\Debug\PatternRecognition.pdb
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\obj\Debug\ConvolutionalNetwork.csproj.CoreCompileInputs.cache
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\obj\Debug\PatternRecognition.exe
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\obj\Debug\PatternRecognition.pdb
+C:\Users\fi777\OneDrive\Desktop\Projects\Machine Learning\PatternRecognition\PatternRecognition\obj\Debug\ConvolutionalNetwork.csprojAssemblyReference.cache
