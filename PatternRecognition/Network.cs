@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace PatternRecognition
 {
-    //IDisposable - для задания функции Dispose (реализует освобождение ресурсов)
     class Network<LossFunctionType> : IDisposable where LossFunctionType : ILoss, new()
     {
         private List<BaseLayer> layers;

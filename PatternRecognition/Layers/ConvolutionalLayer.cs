@@ -1,13 +1,10 @@
 ﻿using System;
-using System.IO;
-using System.Drawing;
 using PatternRecognition.Interfaces;
 using PatternRecognition.Templates;
-using System.Drawing.Imaging;
 
 namespace PatternRecognition.Layers
 {
-    class ConvolutionalLayer : BaseLayer
+    class ConvolutionalLayer
     {
         int stride = 1;
         private static int numberChannels = 3;
@@ -16,117 +13,12 @@ namespace PatternRecognition.Layers
         Matrix[] output = new Matrix[numberChannels];
         Matrix kernel = formKernel(5, 5);
 
-        public ConvolutionalLayer(int iCount, int oCount, IActivation activationFunc) : base(iCount, oCount, activationFunc)
+        public ConvolutionalLayer(int bias, IActivation activationFunc)
         {
 
         }
 
-        public Matrix[,] loadInput()
-        {
-            String path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory) + @"..\\..\\trainData";
-            DirectoryInfo dir = new DirectoryInfo(path);
-            Matrix[,] result = new Matrix[dir.GetFiles().Length, numberChannels];
-            int i = 0;
-            foreach (var item in dir.GetFiles())
-            {
-                Matrix[] load = loadImage(item.FullName);
-                for (int j = 0; j < numberChannels; j++)
-                {
-                    result[i, j] = load[j];
-                }
-                i++;
-            }
-            //writeRGB(result, path, ".png");
-            return result;
-        }
-
-        public void writeRGB(Matrix[,] images, String path, String imageFormat)
-        {
-            String newPath = path;
-            int number = images.Length / numberChannels;
-            for (int i = 0; i < number; i++)
-            {
-                for (int j = 0; j < numberChannels; j++)
-                {
-                    switch (j)
-                    {
-                        case 0:
-                            newPath = path + "\\" + i + "r" + imageFormat;
-                            break;
-                        case 1:
-                            newPath = path + "\\" + i + "g" + imageFormat;
-                            break;
-                        case 2:
-                            newPath = path + "\\" + i + "b" + imageFormat;
-                            break;
-                    }
-                    Bitmap myBitmap = new Bitmap(images[i, j].CountRow, images[i, j].CountColumn);
-                    for (int k = 0; k < images[i, j].CountRow; k++)
-                    {
-                        for (int h = 0; h < images[i, j].CountColumn; h++)
-                        {
-                            Color color = new Color();
-                            switch (j)
-                            {
-                                case 0:
-                                    color = Color.FromArgb((byte)images[i, j][k, h], 0, 0);
-                                    break;
-                                case 1:
-                                    color = Color.FromArgb(0, (byte)images[i, j][k, h], 0);
-                                    break;
-                                case 2:
-                                    color = Color.FromArgb(0, 0, (byte)images[i, j][k, h]);
-                                    break;
-                            }
-                            myBitmap.SetPixel(k, h, color);
-                        }
-                    }
-                    myBitmap.Save(newPath, ImageFormat.Bmp);
-                    newPath = path;
-                }
-            }
-        }
-
-        public Matrix[] loadImage(String path)
-        {
-            Matrix[] result = new Matrix[numberChannels];
-            try
-            {
-                var image = new Bitmap(path, true);
-                int width = image.Width;
-                int height = image.Height;
-                for (int i = 0; i < numberChannels; i++)
-                {
-                    result[i] = new Matrix(width, height);
-                    for (int x = 0; x < width; x++)
-                    {
-                        for (int y = 0; y < height; y++)
-                        {
-                            Color pixelColor = image.GetPixel(x, y);
-                            switch (i)
-                            {
-                                case 0:
-                                    result[i][x, y] = pixelColor.R;
-                                    break;
-                                case 1:
-                                    result[i][x, y] = pixelColor.G;
-                                    break;
-                                case 2:
-                                    result[i][x, y] = pixelColor.B;
-                                    break;
-                            }
-                        }
-                    }
-                }
-                return result;
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("Load image error.");
-                return null;
-            }
-        }
-
+     
         private void modifiedInput()
         {
             Matrix[] newInput = new Matrix[numberChannels];
