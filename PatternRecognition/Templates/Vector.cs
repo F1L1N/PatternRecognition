@@ -1,16 +1,17 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace PatternRecognition.Templates
 {
     class Vector
     {
         public double[] vector = null;
-        public int Count { get; private set; }
+        public int count { get; private set; }
 
         public Vector(int x)
         {
             vector = new double[x];
-            Count = x;
+            count = x;
         }
 
         public double this[int x]
@@ -21,7 +22,7 @@ namespace PatternRecognition.Templates
 
         public static Vector operator /(Vector vector, int number)
         {
-            for (int i = 0; i < vector.Count; i++)
+            for (int i = 0; i < vector.count; i++)
                 vector[i] /= number;
             return vector;
         }
@@ -29,7 +30,7 @@ namespace PatternRecognition.Templates
         public double Max()
         {
             double max = vector[0];
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
             {
                 if (max < vector[i]) max = vector[i];
             }
@@ -38,27 +39,37 @@ namespace PatternRecognition.Templates
 
         public int MaxPosition()
         {
-            int maxi = 0;
+            int maxPosition = 0;
             double max = vector[0];
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
             {
                 if (max < vector[i])
                 {
                     max = vector[i];
-                    maxi = i;
+                    maxPosition = i;
                 }
             }
-            return maxi;
+            return maxPosition;
         }
 
         public double Average()
         {
             double avg = 0.0;
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
             {
                 avg += vector[i];
             }
-            return avg / Count;
+            return avg / count;
+        }
+
+        public Vector Clone()
+        {
+            Vector result = new Vector(count);
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = vector[i];
+            }
+            return result;
         }
 
         public override string ToString()
@@ -66,7 +77,7 @@ namespace PatternRecognition.Templates
             StringBuilder ret = new StringBuilder();
             if (vector == null) return ret.ToString();
 
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
             {
                  ret.Append(vector[i]);
                  ret.Append("\t");

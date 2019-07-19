@@ -71,7 +71,7 @@ namespace PatternRecognition.Layers
             }
             catch (ArgumentException)
             {
-                Console.WriteLine("Load image error.");
+                Console.WriteLine("Load image error on path " + path);
                 return null;
             }
         }

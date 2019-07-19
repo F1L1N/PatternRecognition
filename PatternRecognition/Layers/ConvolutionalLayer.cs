@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using PatternRecognition.Interfaces;
 using PatternRecognition.Templates;
+using PatternRecognition.Tools;
 
 namespace PatternRecognition.Layers
 {
@@ -8,17 +11,22 @@ namespace PatternRecognition.Layers
     {
         int stride = 1;
         private static int numberChannels = 3;
+        private int numberKernels = numberChannels;
         private string convolutionMode = "valid";
         Matrix[] input = new Matrix[numberChannels];
         Matrix[] output = new Matrix[numberChannels];
-        Matrix kernel = formKernel(5, 5);
+        List<Matrix> kernels = formKernel(5, 5);
 
-        public ConvolutionalLayer(int bias, IActivation activationFunc)
+        public ConvolutionalLayer(Matrix[] input)
         {
-
+            this.input = input;
         }
 
-     
+        private Vector BackPropagation(Vector vector)
+        {
+            return null;
+        }
+
         private void modifiedInput()
         {
             Matrix[] newInput = new Matrix[numberChannels];
@@ -26,10 +34,10 @@ namespace PatternRecognition.Layers
             switch (convolutionMode)
             {
                 case "same":
-                    shift = kernel.CountRow % 2;
+                    shift = kernels[0].CountRow % 2;
                     break;
                 case "full":
-                    shift = kernel.CountRow - 1;
+                    shift = kernels[0].CountRow - 1;
                     break;
                 default:
                     Console.WriteLine("Changes don't need.");
@@ -84,41 +92,51 @@ namespace PatternRecognition.Layers
             input = newInput;
         }
 
-        private static Matrix formKernel(int x, int y)
+        private static List<Matrix> formKernel(int x, int y)
         {
-            Matrix kernel = new Matrix(x, y);
+            //List<Matrix> kernel = new Matrix(x, y);
+            List<Matrix> kernels = new List<Matrix>();
             Random rand = new Random();
-            for (int i = 0; i < kernel.CountRow; i++)
-                for (int j = 0; j < kernel.CountColumn; j++)
+            for (int k = 0; k < numberChannels; k++)
+            {
+                Matrix kernel = new Matrix(x, y);
+                for (int i = 0; i < kernel.CountRow; i++)
                 {
-                    kernel[i, j] = Convert.ToDouble(rand.Next(-10, 10)) / 100;
+                    for (int j = 0; j < kernel.CountColumn; j++)
+                    {
+                        kernel[i, j] = Convert.ToDouble(rand.Next(-10, 10)) / 100;
+                    }
                 }
-            return kernel;
+                kernels.Add(kernel);
+            }
+            return kernels;
         }
 
         private void formOutput()
         {
-            //загрузка изображений по очереди
-
             //расширение размера
             modifiedInput();
             //свертка
-            int shift = kernel.CountRow % 2;
+            int shift = kernels[0].CountRow % 2;
             for (int o = 0; o < input.Length; o++)
             {
-                for (int i = 1; i < input[o].CountRow - 1; i += stride)
+                //Matrix featureMap = new Matrix();
+                for (int p = 0; p < numberKernels; p++)
                 {
-                    for (int j = 1; j < input[o].CountColumn - 1; j += stride)
+                    for (int i = 1; i < input[o].CountRow - 1; i += stride)
                     {
-                        double output = 0.0;
-                        for (int k = 0; k < kernel.CountRow; k++)
+                        for (int j = 1; j < input[o].CountColumn - 1; j += stride)
                         {
-                            for (int h = 0; h < kernel.CountColumn; h++)
+                            double output = 0.0;
+                            for (int k = 0; k < kernels[0].CountRow; k++)
                             {
-                                output += input[o][i - shift, j - shift] * kernel[k, h];
+                                for (int h = 0; h < kernels[0].CountColumn; h++)
+                                {
+                                    output += input[o][i - shift, j - shift] * kernels[p][k, h];
+                                }
                             }
+                            input[o][i, j] = output;
                         }
-                        input[o][i, j] = output;
                     }
                 }
             }

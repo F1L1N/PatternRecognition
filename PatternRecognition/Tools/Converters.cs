@@ -5,7 +5,7 @@ namespace PatternRecognition.Tools
 {
     class Converters
     {
-        public Vector ToVector(Matrix[] array, int h, int w)
+        public static Vector ToVector(Matrix[] array, int h, int w)
         {
             Vector vector = new Vector(array.Length * h * w);
             int index = 0;
@@ -25,7 +25,7 @@ namespace PatternRecognition.Tools
             return vector;
         }
 
-        public Vector ToVector(Matrix matrix)
+        public static Vector ToVector(Matrix matrix)
         {
             Vector vector = new Vector(matrix.CountRow * matrix.CountColumn);
             int index = 0;
@@ -42,9 +42,9 @@ namespace PatternRecognition.Tools
             return vector;
         }
 
-        public Matrix[] ToMatrix(Vector vector, int d, int h, int w)
+        public static Matrix[] ToMatrix(Vector vector, int d, int h, int w)
         {
-            if (vector.Count != d * h * w)
+            if (vector.count != d * h * w)
             {
                 throw new ArgumentException("Invalid vector's size");
             }
@@ -69,9 +69,9 @@ namespace PatternRecognition.Tools
             return array;
         }
 
-        public Matrix ToMatrix(Vector vector, int h, int w)
+        public static Matrix ToMatrix(Vector vector, int h, int w)
         {
-            if (vector.Count != h * w)
+            if (vector.count != h * w)
             {
                 throw new ArgumentException("Invalid vector's size");
             }

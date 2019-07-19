@@ -1,78 +1,44 @@
-﻿using System;
-using ConvolutionalNetwork.Activations;
-using PatternRecognition.Interfaces;
+﻿using ConvolutionalNetwork.Activations;
 using PatternRecognition.Templates;
+using static System.Math;
 
 namespace PatternRecognition
 {
     class Neuron
     {
-        #region Variables
-
-        private static readonly Random random = new Random();
-
-        private IActivation activationFunction;
-
-        public Vector inputs { get; set; }
-
-        private int inputCount;
-
+        private NeuronType type;
+        private double[] weights;
+        private double[] inputs;
         private double output;
+        private double derivative;
 
-        public Vector weightFactors { get; set; }
-
-        public double errorSignal { get; set; }
-
-        public double deepRating { get; set; }
-
-        #endregion
-
-        #region Methods
-
-        public Neuron(int count, IActivation activation, double rating = 0.3)
+        public Neuron(double[] inputs, double[] weights, NeuronType type)
         {
-            inputCount = count;
-            weightFactors = new Vector(inputCount);
-            activationFunction = activation;
-            initWeightFactors();
-            deepRating = rating;
+            this.type = type;
+            this.weights = weights;
+            this.inputs = inputs;
         }
 
-        private void initWeightFactors()
+        public void Activator(double[] i, double[] w)
         {
-            for (int i = 0; i < weightFactors.Count; i++)
+            double sum = w[0];
+            for (int l = 0; l < i.Length; ++l)
             {
-                weightFactors[i] = random.Next(-5, 5) / 10.0;
+                sum += i[l] * w[l + 1];
+            }
+            switch (type)
+            {
+                case NeuronType.Convolution:
+                    LReLU relu = new LReLU();
+                    output = relu.f(sum);
+                    derivative = relu.df(sum);
+                    break;
+                case NeuronType.Pooling:
+                    break;
+                case NeuronType.FullyConnected:
+                    output = Exp(sum);
+                    break;
             }
         }
-
-        public void initInputValues(Vector inputValues)
-        {
-            inputs = inputValues;
-        }
-
-        public void abjustWeights()
-        {
-            for (int i = 0; i < inputCount; i++)
-            {
-                weightFactors[i] += deepRating * errorSignal * inputs[i] * output * (1 - output);
-            }
-        }
-
-        public virtual double Output
-        {
-            get
-            {
-                LReLU relu = new LReLU();
-                output = relu.f(output);
-                return output;
-            }
-            set
-            {
-                output = value;
-            }
-        }
-
-        #endregion
     }
 }

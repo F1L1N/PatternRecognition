@@ -4,6 +4,7 @@ namespace ConvolutionalNetwork
 {
     namespace Activations
     {
+        //TODO make activations class static?
         public class Identity : IActivation
         {
             public double f(double x)
