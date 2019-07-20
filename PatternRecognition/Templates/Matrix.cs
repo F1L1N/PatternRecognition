@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace PatternRecognition.Templates
@@ -31,6 +32,14 @@ namespace PatternRecognition.Templates
                     result[i, j] = x;
                 }
             return result;
+        }
+
+
+            for (int bi = 0; bi < size; bi++)
+                for (int bj = 0; bj < size; bj++)
+                    block[bi, bj] = matrix[i + bi, j + bj];
+
+            return block;
         }
 
         //заполнение матрицы в соответствии с нормальным 

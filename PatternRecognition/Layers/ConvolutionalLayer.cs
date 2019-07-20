@@ -10,12 +10,19 @@ namespace PatternRecognition.Layers
     class ConvolutionalLayer
     {
         int stride = 1;
-        private static int numberChannels = 3;
+        private static int numberChannels;
         private int numberKernels = numberChannels;
-        private string convolutionMode = "valid";
+        private string convolutionMode;
         Matrix[] input = new Matrix[numberChannels];
         Matrix[] output = new Matrix[numberChannels];
-        List<Matrix> kernels = formKernel(5, 5);
+        List<Matrix> kernels;
+
+        public ConvolutionalLayer()
+        {
+            kernels = formKernel(5, 5);
+            convolutionMode = "valid";
+            numberChannels = 3;
+        }
 
         public ConvolutionalLayer(Matrix[] input)
         {
@@ -96,7 +103,7 @@ namespace PatternRecognition.Layers
         {
             //List<Matrix> kernel = new Matrix(x, y);
             List<Matrix> kernels = new List<Matrix>();
-            Random rand = new Random();
+            Random random = new Random();
             for (int k = 0; k < numberChannels; k++)
             {
                 Matrix kernel = new Matrix(x, y);
@@ -104,11 +111,18 @@ namespace PatternRecognition.Layers
                 {
                     for (int j = 0; j < kernel.CountColumn; j++)
                     {
-                        kernel[i, j] = Convert.ToDouble(rand.Next(-10, 10)) / 100;
+                        kernel[i, j] = Convert.ToDouble(random.Next(-10, 10)) / 100;
                     }
                 }
                 kernels.Add(kernel);
             }
+            return kernels;
+        }
+
+        //перегрузка для загрузки из памяти
+        private static List<Matrix> formKernel()
+        {
+            List<Matrix> kernels = new List<Matrix>();
             return kernels;
         }
 
