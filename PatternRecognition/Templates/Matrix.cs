@@ -16,7 +16,6 @@ namespace PatternRecognition.Templates
             CountRow = x;
             CountColumn = y;
         }
-
         public double this[int x, int y]
         {
             get { return matrix[x, y]; }
@@ -34,6 +33,9 @@ namespace PatternRecognition.Templates
             return result;
         }
 
+        internal Matrix getSubMatrix(int i, int j, int size)
+        {
+            Matrix block = new Matrix(size, size);
 
             for (int bi = 0; bi < size; bi++)
                 for (int bj = 0; bj < size; bj++)
