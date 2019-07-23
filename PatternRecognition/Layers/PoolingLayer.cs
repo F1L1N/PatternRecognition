@@ -1,4 +1,5 @@
-﻿using PatternRecognition.Templates;
+﻿using PatternRecognition.Interfaces;
+using PatternRecognition.Templates;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,29 @@ using System.Threading.Tasks;
 
 namespace PatternRecognition.Layers
 {
-    class PoolingLayer
+    class PoolingLayer<PoolingType> : BaseLayer where PoolingType : IPooling, new()
     {
         private static int numberChannels;
         Matrix[] input = new Matrix[numberChannels];
         Matrix[] output = new Matrix[numberChannels];
-        private int stride;
+        private new int stride;
         private string mode;
-        private void formOutput()
+
+        public override Vector inputs { set => throw new NotImplementedException(); }
+
+        public override Vector outputs => throw new NotImplementedException();
+
+        public override Vector BackPropagation(Vector vector)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ForwardPropagation()
+        {
+            Pooling();
+        }
+
+        private void Pooling()
         {
             List<Matrix> result = new List<Matrix>();
             //пулинг
