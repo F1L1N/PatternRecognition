@@ -90,5 +90,10 @@ namespace PatternRecognition.Tools
 
             return matrix;
         }
+
+        internal static Matrix[] ToMatrices(Vector value, object wei_dep, object wei_hei, object wei_wid)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

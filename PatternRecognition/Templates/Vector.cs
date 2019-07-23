@@ -85,6 +85,14 @@ namespace PatternRecognition.Templates
             ret.Append("\n");
             return ret.ToString();
         }
+
+        public void Full(int count, int number)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                vector[i] = number;
+            }
+        }
     }
 
 }

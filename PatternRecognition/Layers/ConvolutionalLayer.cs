@@ -7,19 +7,38 @@ using PatternRecognition.Tools;
 
 namespace PatternRecognition.Layers
 {
-    class ConvolutionalLayer
+    class ConvolutionalLayer<ActivationType> : BaseLayer where ActivationType : IActivation, new()
     {
-        int stride = 1;
+        private new int stride = 1;
         private static int numberChannels;
-        private int numberKernels = numberChannels;
+        private int numberKernels;
         private string convolutionMode;
-        Matrix[] input = new Matrix[numberChannels];
-        Matrix[] output = new Matrix[numberChannels];
-        List<Matrix> kernels;
+        private Matrix[] input = new Matrix[numberChannels];
+        private Matrix[] output = new Matrix[numberChannels];
+        private Matrix[] kernels;
+
+        protected ActivationType activation = new ActivationType();
+
+        private int inputHeight, inputWidth, inputDepth;
+
+        protected int outputHeight, outputWidth, outputDepth;
+
+        protected int weightsHeight, weightsWidth, weightsDepth, weightsSize;
+
+        protected int padding;
+
+        protected int paddingInputSize, paddingInputHeight, paddingInputWidth;
+
+        //TODO what's wrong with this parameters
+        protected Matrix[] _dw;
+  
+        protected Vector _db;
+
+        protected Matrix[] _pre_dw;
 
         public ConvolutionalLayer()
         {
-            kernels = formKernel(5, 5);
+            //kernels = formKernel(5, 5);
             convolutionMode = "valid";
             numberChannels = 3;
         }
@@ -29,7 +48,87 @@ namespace PatternRecognition.Layers
             this.input = input;
         }
 
-        private Vector BackPropagation(Vector vector)
+        public ConvolutionalLayer(
+                int inputHeight, int inputWidth, int inputDepth, 
+                int kernelSize = 3, int out_depth = 32,
+                int stride = 1, int padding = 0, string layerName = "",
+                Vector kernels = null, Vector biases = null)
+        {
+            this.inputHeight = inputHeight;
+            this.inputWidth = inputWidth;
+            this.inputDepth = inputDepth;
+            this.inputSize = inputHeight * inputWidth * inputDepth;
+
+            this.paddingInputHeight = inputHeight + padding * 2;
+            this.paddingInputWidth = inputWidth + padding * 2;
+            this.paddingInputSize = paddingInputHeight * paddingInputWidth * inputDepth;
+
+            this.input = new Matrix[inputDepth];
+            for (int i = 0; i < inputDepth; i++)
+            {
+                this.input[i].Full(paddingInputHeight, paddingInputWidth, 0);
+            }
+
+            this.weightsHeight = weightsWidth = kernelSize;
+            this.weightsDepth = inputDepth * out_depth;
+            this.weightsSize = kernelSize * kernelSize * weightsDepth;
+
+            this.outputHeight = (paddingInputHeight - weightsHeight) / stride + 1;
+            this.outputWidth = (paddingInputWidth - weightsWidth) / stride + 1;
+            this.outputDepth = out_depth;
+            this.outputSize = outputHeight * outputWidth * outputDepth;
+
+            LayerType = "ConvolutionalLayer";
+            //GenericsType = activation.Type();
+
+            this.stride = stride;
+            this.padding = padding;
+
+            output = new Matrix[outputDepth];
+            for (int i = 0; i < outputDepth; i++)
+            {
+                output[i].Full(outputHeight, outputWidth, 0);
+            }
+
+            //TODO think about loading kernels from xml
+            this.kernels = new Matrix[weightsDepth];
+            if (kernels != null && kernels.count == weightsSize)
+            {
+                GenerateWeights(kernels);
+            }
+            else
+            {
+                var accuracy = Math.Sqrt(inputDepth * weightsHeight * weightsWidth);
+                GenerateWeights(-1.0 / accuracy, 1.0 / accuracy);
+            }
+
+            if (biases != null && biases.count == out_depth)
+            {
+                biases = biases.Clone();
+            }
+            else
+            {
+                biases.Full(out_depth, 0);
+            }
+
+
+            _dw = new Matrix[weightsDepth];
+            _pre_dw = new Matrix[weightsDepth];
+            for (int wd = 0; wd < weightsDepth; wd++)
+            {
+                _dw[wd].Full(weightsHeight, weightsWidth, 0);
+                _pre_dw[wd].Full(weightsHeight, weightsWidth, 0);
+            }
+
+            _db.Full(out_depth, 0);
+        }
+
+        public override void ForwardPropagation()
+        {
+            Convolution();
+        }
+
+        public override Vector BackPropagation(Vector vector)
         {
             return null;
         }
@@ -99,10 +198,10 @@ namespace PatternRecognition.Layers
             input = newInput;
         }
 
-        private static List<Matrix> formKernel(int x, int y)
+        private static Matrix[] formKernel(int numberKernels, int x, int y)
         {
             //List<Matrix> kernel = new Matrix(x, y);
-            List<Matrix> kernels = new List<Matrix>();
+            Matrix[] kernels = new Matrix[numberKernels];
             Random random = new Random();
             for (int k = 0; k < numberChannels; k++)
             {
@@ -114,7 +213,7 @@ namespace PatternRecognition.Layers
                         kernel[i, j] = Convert.ToDouble(random.Next(-10, 10)) / 100;
                     }
                 }
-                kernels.Add(kernel);
+                kernels[k] = kernel;
             }
             return kernels;
         }
@@ -126,7 +225,7 @@ namespace PatternRecognition.Layers
             return kernels;
         }
 
-        private void formOutput()
+        private void Convolution()
         {
             //расширение размера
             modifiedInput();
@@ -155,6 +254,80 @@ namespace PatternRecognition.Layers
                 }
             }
             output = input;
+        }
+
+        public override Vector inputs
+        {
+            set
+            {
+                if (inputSize != value.count)
+                {
+                    throw new ArgumentException("Size of inputs is different");
+                }
+                int counter = 0;
+                for (int d = 0; d < inputDepth; d++)
+                {
+                    for (int h = 0; h < inputHeight; h++)
+                    {
+                        for (int w = 0; w < inputWidth; w++)
+                        {
+                            input[d][h + padding, w + padding] = value[counter];
+                            counter++;
+                        }
+                    }
+                }
+            }
+        }
+
+        public override Vector outputs
+        {
+            get
+            {
+                Matrix[] matrices = new Matrix[output.Length];
+                for (int k = 0; k < matrices.Length; k++)
+                {
+                    for (int i = 0; i < matrices[k].CountRow; i++)
+                    {
+                        for (int j = 0; j < matrices[k].CountColumn; j++)
+                        {
+                            matrices[k][i, j] = activation.f(output[k][i, j]);
+                        }
+                    }
+                }
+                return Converters.ToVector(matrices, outputHeight, outputWidth);
+            }
+        }
+
+        public override Vector weights
+        {
+            get
+            {
+                return Converters.ToVector(kernels, weightsHeight, weightsWidth);
+            }
+            protected set
+            {
+                if (weightsSize != value.count)
+                {
+                    throw new ArgumentException("Size of kernels are different");
+                }
+                kernels = Converters.ToMatrices(value, weightsDepth, weightsHeight, weightsWidth);
+            }
+        }
+
+        public override Vector biases
+        {
+            get
+            {
+                return biases.Clone();
+            }
+            protected set
+            {
+                if (outputDepth != value.count)
+                {
+                    throw new ArgumentException("Size of biases are different");
+                }
+                biases = value.Clone();
+            }
         }
     }
 }
